@@ -37,6 +37,17 @@ X_ft = pd.DataFrame(columns=X_feat.columns,
                     data=X_ft,
                     index=X_feat.index)
 
+X1, y1 = lstm_split(stock_data.values, n_steps=2)
+
+train_split=0.8
+split_idx = int(np.ceil(len(X1) * train_split))
+date_index = stock_data.index
+
+X_train, X_test = X1[:split_idx], X1[split_idx:]
+y_train, y_test = y1[:split_idx], y1[split_idx:]
+x_train_date, X_test_date = date_index[:split_idx], date_index[split_idx:]
+
+print(X1.shape, X_train.shape, X_test.shape, y_test.shape)
 
 plt.figure(figsize=(15,10))
 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))

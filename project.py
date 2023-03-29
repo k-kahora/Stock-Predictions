@@ -343,6 +343,9 @@ plt.plot(plot_date_test, to_plot_data_y_test_pred, label="Predicted price for ne
 plt.title("Predicted close price of the next trading day")
 plt.grid(which='major', axis='y', linestyle='--')
 plt.legend()
+
+print(to_plot_data_y_val_pred)
+
 plt.show()
 
 print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))

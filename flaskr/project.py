@@ -48,6 +48,8 @@ config = {
         "scheduler_step_size": 40,
     }
 }
+def set_config(new_config):
+   config = new_config 
 
 def download_data(config):
     ts = TimeSeries(key=config["alpha_vantage"]["key"])
@@ -358,4 +360,4 @@ def last_step():
                 
                 
                 
-last_step()
+# last_step()

@@ -3,7 +3,8 @@ from flask import jsonify
 import sys
 import os
 sys.path.insert(0, os.getcwd()+"/flaskr/")
-from project import download_data
+from project import last_step
+from project import set_config 
 
 app = Flask(__name__)
 
@@ -47,5 +48,11 @@ config = {
 @app.route("/<string:symbol>/")
 def get_symbol_data(symbol):
     # data = download_data(config)
+    config["alpha_vantage"]["symbol"] = symbol
+    set_config(config)
+    last_step()
     # return data
+
+    # Need to convert the data from a pandas graph to a json format that a front end javascript can use to display some sexy graphs
+    
     return "<p>Hello, World!</p>" + symbol

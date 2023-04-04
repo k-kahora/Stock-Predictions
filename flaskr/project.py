@@ -43,7 +43,7 @@ config = {
     "training": {
         "device": "cpu", # "cuda" or "cpu"
         "batch_size": 64,
-        "num_epoch": 100,
+        "num_epoch": 10,
         "learning_rate": 0.01,
         "scheduler_step_size": 40,
     }
@@ -345,7 +345,15 @@ plt.grid(which='major', axis='y', linestyle='--')
 plt.legend()
 
 print(to_plot_data_y_val_pred)
+print(plot_date_test)
+json_response = zip(plot_date_test, to_plot_data_y_test_pred)
+print(json_response)
 
-plt.show()
+# plt.show()
 
 print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
+
+
+                
+                
+                

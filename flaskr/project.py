@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.timeseries import TimeSeries 
 
 print("All libraries loaded")
 

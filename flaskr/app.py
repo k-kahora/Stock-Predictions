@@ -9,9 +9,9 @@ incomes = [
 
 
 
-@app.route('/predict')
-def get_stock():
-    return stockpredict.plot_stock()
+@app.route('/predict/<symbol>')
+def get_stock(symbol):
+    return jsonify(stockpredict.plot_stock(symbol))
 
 @app.route('/incomes')
 def get_incomes():

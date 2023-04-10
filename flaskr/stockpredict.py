@@ -14,6 +14,17 @@ from alpha_vantage.timeseries import TimeSeries
 
 print("All libraries loaded")
 
+final_data = {
+    "stock_data": {
+        "dates": [],
+        "data": [],
+    },
+    "prediction_data": {
+        "dates": [],
+        "data": [],
+    }
+}
+
 config = {
     "alpha_vantage": {
         "key": "1PE5QDO714ILKZ2Z", # Claim your free API key here: https://www.alphavantage.co/support/#api-key
@@ -49,8 +60,11 @@ config = {
     }
 }
 
-def download_data(config):
+def download_data(config, symbol):
     ts = TimeSeries(key=config["alpha_vantage"]["key"])
+    print("download")
+
+    print(config["alpha_vantage"]["symbol"])
     data, meta_data = ts.get_daily_adjusted(config["alpha_vantage"]["symbol"], outputsize=config["alpha_vantage"]["outputsize"])
 
     data_date = [date for date in data.keys()]
@@ -66,9 +80,12 @@ def download_data(config):
 
     return data_date, data_close_price, num_data_points, display_date_range
 
-def plot_stock():
+def plot_stock(symbol="AAPL"):
 
-    data_date, data_close_price, num_data_points, display_date_range = download_data(config)
+    print(symbol)
+    config["alpha_vantage"]["symbol"] = symbol
+
+    data_date, data_close_price, num_data_points, display_date_range = download_data(config, symbol)
 
 # plot
 
@@ -299,19 +316,25 @@ def plot_stock():
 
 # plots
 
-    fig = figure(figsize=(25, 5), dpi=80)
-    fig.patch.set_facecolor((1.0, 1.0, 1.0))
-    plt.plot(data_date, data_close_price, label="Actual prices", color=config["plots"]["color_actual"])
-    plt.plot(data_date, to_plot_data_y_train_pred, label="Predicted prices (train)", color=config["plots"]["color_pred_train"])
-    plt.plot(data_date, to_plot_data_y_val_pred, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
-    plt.title("Compare predicted prices to actual prices")
-    xticks = [data_date[i] if ((i%config["plots"]["xticks_interval"]==0 and (num_data_points-i) > config["plots"]["xticks_interval"]) or i==num_data_points-1) else None for i in range(num_data_points)] # make x ticks nice
-    x = np.arange(0,len(xticks))
-    plt.xticks(x, xticks, rotation='vertical')
-    plt.grid(which='major', axis='y', linestyle='--')
-    plt.legend()
-    plt.show()
+    # fig = figure(figsize=(25, 5), dpi=80)
+    # fig.patch.set_facecolor((1.0, 1.0, 1.0))
+    # plt.plot(data_date, data_close_price, label="Actual prices", color=config["plots"]["color_actual"])
+    # plt.plot(data_date, to_plot_data_y_train_pred, label="Predicted prices (train)", color=config["plots"]["color_pred_train"])
+    # plt.plot(data_date, to_plot_data_y_val_pred, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
+    # plt.title("Compare predicted prices to actual prices")
+    # xticks = [data_date[i] if ((i%config["plots"]["xticks_interval"]==0 and (num_data_points-i) > config["plots"]["xticks_interval"]) or i==num_data_points-1) else None for i in range(num_data_points)] # make x ticks nice
+    # x = np.arange(0,len(xticks))
+    # plt.xticks(x, xticks, rotation='vertical')
+    # plt.grid(which='major', axis='y', linestyle='--')
+    # plt.legend()
+    # plt.show()
 
+
+    print(to_plot_data_y_val_pred)
+
+    final_data["stock_data"]["data"] = to_plot_data_y_val_pred.tolist()
+    final_data["stock_data"]["dates"] = data_date
+    # final_data.dates = data_date
     # prepare data for plotting the zoomed in view of the predicted prices (on validation set) vs. actual prices
 
     to_plot_data_y_val_subset = scaler.inverse_transform(data_y_val)
@@ -320,17 +343,17 @@ def plot_stock():
 
 # plots
 
-    fig = figure(figsize=(25, 5), dpi=80)
-    fig.patch.set_facecolor((1.0, 1.0, 1.0))
-    plt.plot(to_plot_data_date, to_plot_data_y_val_subset, label="Actual prices", color=config["plots"]["color_actual"])
-    plt.plot(to_plot_data_date, to_plot_predicted_val, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
-    plt.title("Zoom in to examine predicted price on validation data portion")
-    xticks = [to_plot_data_date[i] if ((i%int(config["plots"]["xticks_interval"]/5)==0 and (len(to_plot_data_date)-i) > config["plots"]["xticks_interval"]/6) or i==len(to_plot_data_date)-1) else None for i in range(len(to_plot_data_date))] # make x ticks nice
-    xs = np.arange(0,len(xticks))
-    plt.xticks(xs, xticks, rotation='vertical')
-    plt.grid(which='major', axis='y', linestyle='--')
-    plt.legend()
-    plt.show()
+    # fig = figure(figsize=(25, 5), dpi=80)
+    # fig.patch.set_facecolor((1.0, 1.0, 1.0))
+    # plt.plot(to_plot_data_date, to_plot_data_y_val_subset, label="Actual prices", color=config["plots"]["color_actual"])
+    # plt.plot(to_plot_data_date, to_plot_predicted_val, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
+    # plt.title("Zoom in to examine predicted price on validation data portion")
+    # xticks = [to_plot_data_date[i] if ((i%int(config["plots"]["xticks_interval"]/5)==0 and (len(to_plot_data_date)-i) > config["plots"]["xticks_interval"]/6) or i==len(to_plot_data_date)-1) else None for i in range(len(to_plot_data_date))] # make x ticks nice
+    # xs = np.arange(0,len(xticks))
+    # plt.xticks(xs, xticks, rotation='vertical')
+    # plt.grid(which='major', axis='y', linestyle='--')
+    # plt.legend()
+    # plt.show()
 
     # predict the closing price of the next trading day
 
@@ -373,8 +396,9 @@ def plot_stock():
 
     print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
     print("Hrere")
-    print(to_plot_data_y_test_pred)
+    print(plot_date_test)
 
+    return final_data
     
 
 if __name__ == "__main__": 

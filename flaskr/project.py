@@ -14,6 +14,36 @@ from alpha_vantage.timeseries import TimeSeries
 
 print("All libraries loaded")
 
+# global class allows all functions to access the data at any time
+
+class AI:
+    def __init__(self):
+        self.data_date = []
+        self.split_index = []
+        self.data_x_unseen = []
+        self.data_x = []
+
+        self.data_x_train = []
+        self.data_x_val = []
+        self.data_y_train = []
+        self.data_y_val = []
+        self.scheduler = []
+        self.model = []
+        self.data_close_price = []
+        self.num_data_points = []
+        self.display_date_range = []
+        self.val_dataloader = []
+        self.dataset_val = []
+        self.train_dataloader = []
+        self.criterion = []
+        self.dataset_train = []
+        self.optimizer = []
+        self.normalized_data_close_price = []
+        self.scaler = []
+
+
+vars = AI()
+
 config = {
     "alpha_vantage": {
         "key": "1PE5QDO714ILKZ2Z", # Claim your free API key here: https://www.alphavantage.co/support/#api-key
@@ -43,7 +73,7 @@ config = {
     "training": {
         "device": "cpu", # "cuda" or "cpu"
         "batch_size": 64,
-        "num_epoch": 100,
+        "num_epoch": 3,
         "learning_rate": 0.01,
         "scheduler_step_size": 40,
     }
@@ -66,7 +96,7 @@ def download_data(config):
 
     return data_date, data_close_price, num_data_points, display_date_range
 
-data_date, data_close_price, num_data_points, display_date_range = download_data(config)
+
 
 # plot
 
@@ -95,14 +125,47 @@ class Normalizer():
         return (x*self.sd) + self.mu
 
 # normalize
-scaler = Normalizer()
-normalized_data_close_price = scaler.fit_transform(data_close_price)
+# @@Step 1 call this
+def first_part():
+
+    AI.data_date, AI.data_close_price, AI.num_data_points, AI.display_date_range = download_data(config)
+    AI.scaler = Normalizer()
+    AI.normalized_data_close_price = AI.scaler.fit_transform(AI.data_close_price)
+
+    data_x, AI.data_x_unseen = prepare_data_x(AI.normalized_data_close_price, window_size=config["data"]["window_size"])
+    data_y = prepare_data_y(AI.normalized_data_close_price, window_size=config["data"]["window_size"])
+
+# split dataset
+
+    AI.split_index = int(data_y.shape[0]*config["data"]["train_split_size"])
+    AI.data_x_train = data_x[:AI.split_index]
+    AI.data_x_val = data_x[AI.split_index:]
+    AI.data_y_train = data_y[:AI.split_index]
+    AI.data_y_val = data_y[AI.split_index:]
+
+# prepare data for plotting
+
+    to_plot_data_y_train = np.zeros(AI.num_data_points)
+    to_plot_data_y_val = np.zeros(AI.num_data_points)
+
+    to_plot_data_y_train[config["data"]["window_size"]:AI.split_index+config["data"]["window_size"]] = AI.scaler.inverse_transform(AI.data_y_train)
+    to_plot_data_y_val[AI.split_index+config["data"]["window_size"]:] = AI.scaler.inverse_transform(AI.data_y_val)
+
+    to_plot_data_y_train = np.where(to_plot_data_y_train == 0, None, to_plot_data_y_train)
+    to_plot_data_y_val = np.where(to_plot_data_y_val == 0, None, to_plot_data_y_val)
+    AI.dataset_train = TimeSeriesDataset(AI.data_x_train, AI.data_y_train)
+    AI.dataset_val = TimeSeriesDataset(AI.data_x_val, AI.data_y_val)
+    print("Train data shape", AI.dataset_train.x.shape, AI.dataset_train.y.shape)
+    print("Validation data shape", AI.dataset_val.x.shape, AI.dataset_val.y.shape)
+    AI.train_dataloader = DataLoader(AI.dataset_train, batch_size=config["training"]["batch_size"], shuffle=True)
+    AI.val_dataloader = DataLoader(AI.dataset_val, batch_size=config["training"]["batch_size"], shuffle=True)
 
 def prepare_data_x(x, window_size):
     # perform windowing
     n_row = x.shape[0] - window_size + 1
     output = np.lib.stride_tricks.as_strided(x, shape=(n_row, window_size), strides=(x.strides[0], x.strides[0]))
     return output[:-1], output[-1]
+
 
 
 def prepare_data_y(x, window_size):
@@ -113,27 +176,6 @@ def prepare_data_y(x, window_size):
     output = x[window_size:]
     return output
 
-data_x, data_x_unseen = prepare_data_x(normalized_data_close_price, window_size=config["data"]["window_size"])
-data_y = prepare_data_y(normalized_data_close_price, window_size=config["data"]["window_size"])
-
-# split dataset
-
-split_index = int(data_y.shape[0]*config["data"]["train_split_size"])
-data_x_train = data_x[:split_index]
-data_x_val = data_x[split_index:]
-data_y_train = data_y[:split_index]
-data_y_val = data_y[split_index:]
-
-# prepare data for plotting
-
-to_plot_data_y_train = np.zeros(num_data_points)
-to_plot_data_y_val = np.zeros(num_data_points)
-
-to_plot_data_y_train[config["data"]["window_size"]:split_index+config["data"]["window_size"]] = scaler.inverse_transform(data_y_train)
-to_plot_data_y_val[split_index+config["data"]["window_size"]:] = scaler.inverse_transform(data_y_val)
-
-to_plot_data_y_train = np.where(to_plot_data_y_train == 0, None, to_plot_data_y_train)
-to_plot_data_y_val = np.where(to_plot_data_y_val == 0, None, to_plot_data_y_val)
 
 ## plots
 
@@ -160,14 +202,6 @@ class TimeSeriesDataset(Dataset):
     def __getitem__(self, idx):
         return (self.x[idx], self.y[idx])
 
-dataset_train = TimeSeriesDataset(data_x_train, data_y_train)
-dataset_val = TimeSeriesDataset(data_x_val, data_y_val)
-
-print("Train data shape", dataset_train.x.shape, dataset_train.y.shape)
-print("Validation data shape", dataset_val.x.shape, dataset_val.y.shape)
-
-train_dataloader = DataLoader(dataset_train, batch_size=config["training"]["batch_size"], shuffle=True)
-val_dataloader = DataLoader(dataset_val, batch_size=config["training"]["batch_size"], shuffle=True)
 
 class LSTMModel(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=32, num_layers=2, output_size=1, dropout=0.2):
@@ -212,140 +246,143 @@ def run_epoch(dataloader, is_training=False):
     epoch_loss = 0
 
     if is_training:
-        model.train()
+        AI.model.train()
     else:
-        model.eval()
+        AI.model.eval()
 
     for idx, (x, y) in enumerate(dataloader):
         if is_training:
-            optimizer.zero_grad()
+            AI.optimizer.zero_grad()
 
         batchsize = x.shape[0]
 
         x = x.to(config["training"]["device"])
         y = y.to(config["training"]["device"])
 
-        out = model(x)
-        loss = criterion(out.contiguous(), y.contiguous())
+        out = AI.model(x)
+        loss = AI.criterion(out.contiguous(), y.contiguous())
 
         if is_training:
             loss.backward()
-            optimizer.step()
+            AI.optimizer.step()
 
         epoch_loss += (loss.detach().item() / batchsize)
 
-    lr = scheduler.get_last_lr()[0]
+    lr = AI.scheduler.get_last_lr()[0]
 
     return epoch_loss, lr
-
-train_dataloader = DataLoader(dataset_train, batch_size=config["training"]["batch_size"], shuffle=True)
-val_dataloader = DataLoader(dataset_val, batch_size=config["training"]["batch_size"], shuffle=True)
-
-model = LSTMModel(input_size=config["model"]["input_size"], hidden_layer_size=config["model"]["lstm_size"], num_layers=config["model"]["num_lstm_layers"], output_size=1, dropout=config["model"]["dropout"])
-model = model.to(config["training"]["device"])
-
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=config["training"]["learning_rate"], betas=(0.9, 0.98), eps=1e-9)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["training"]["scheduler_step_size"], gamma=0.1)
-
-for epoch in range(config["training"]["num_epoch"]):
-    loss_train, lr_train = run_epoch(train_dataloader, is_training=True)
-    loss_val, lr_val = run_epoch(val_dataloader)
-    scheduler.step()
+def last_step():
+    AI.train_dataloader = DataLoader(AI.dataset_train, batch_size=config["training"]["batch_size"], shuffle=True)
+    val_dataloader = DataLoader(AI.dataset_val, batch_size=config["training"]["batch_size"], shuffle=True)
     
-    print('Epoch[{}/{}] | loss train:{:.6f}, test:{:.6f} | lr:{:.6f}'
+    AI.model = LSTMModel(input_size=config["model"]["input_size"], hidden_layer_size=config["model"]["lstm_size"], num_layers=config["model"]["num_lstm_layers"], output_size=1, dropout=config["model"]["dropout"])
+    AI.model = AI.model.to(config["training"]["device"])
+    
+    AI.criterion = nn.MSELoss()
+    AI.optimizer = optim.Adam(AI.model.parameters(), lr=config["training"]["learning_rate"], betas=(0.9, 0.98), eps=1e-9)
+    AI.scheduler = optim.lr_scheduler.StepLR(AI.optimizer, step_size=config["training"]["scheduler_step_size"], gamma=0.1)
+    
+    for epoch in range(config["training"]["num_epoch"]):
+        loss_train, lr_train = run_epoch(AI.train_dataloader, is_training=True)
+        loss_val, lr_val = run_epoch(AI.val_dataloader)
+        AI.scheduler.step()
+        
+        print('Epoch[{}/{}] | loss train:{:.6f}, test:{:.6f} | lr:{:.6f}'
               .format(epoch+1, config["training"]["num_epoch"], loss_train, loss_val, lr_train))
-# here we re-initialize dataloader so the data doesn't shuffled, so we can plot the values by date
+        # here we re-initialize dataloader so the data doesn't shuffled, so we can plot the values by date
+        
+    AI.train_dataloader = DataLoader(AI.dataset_train, batch_size=config["training"]["batch_size"], shuffle=False)
+    val_dataloader = DataLoader(AI.dataset_val, batch_size=config["training"]["batch_size"], shuffle=False)
+    
+    AI.model.eval()
+    
+    # predict on the training data, to see how well the model managed to learn and memorize
+    
+    predicted_train = np.array([])
 
-train_dataloader = DataLoader(dataset_train, batch_size=config["training"]["batch_size"], shuffle=False)
-val_dataloader = DataLoader(dataset_val, batch_size=config["training"]["batch_size"], shuffle=False)
+    for idx, (x, y) in enumerate(AI.train_dataloader):
+        x = x.to(config["training"]["device"])
+        out = AI.model(x)
+        out = out.cpu().detach().numpy()
+        predicted_train = np.concatenate((predicted_train, out))
+        
+        # predict on the validation data, to see how the model does
+        
+        predicted_val = np.array([])
+        
+    for idx, (x, y) in enumerate(val_dataloader):
+        x = x.to(config["training"]["device"])
+        out = AI.model(x)
+        out = out.cpu().detach().numpy()
+        predicted_val = np.concatenate((predicted_val, out))
+        
+        # prepare data for plotting
+        
+    to_plot_data_y_train_pred = np.zeros(AI.num_data_points)
+    to_plot_data_y_val_pred = np.zeros(AI.num_data_points)
+    
+    to_plot_data_y_train_pred[config["data"]["window_size"]:AI.split_index+config["data"]["window_size"]] = AI.scaler.inverse_transform(predicted_train)
+    to_plot_data_y_val_pred[AI.split_index+config["data"]["window_size"]:] = AI.scaler.inverse_transform(predicted_val)
+    
+    to_plot_data_y_train_pred = np.where(to_plot_data_y_train_pred == 0, None, to_plot_data_y_train_pred)
+    to_plot_data_y_val_pred = np.where(to_plot_data_y_val_pred == 0, None, to_plot_data_y_val_pred)
+    
+    # plots
 
-model.eval()
-
-# predict on the training data, to see how well the model managed to learn and memorize
-
-predicted_train = np.array([])
-
-for idx, (x, y) in enumerate(train_dataloader):
-    x = x.to(config["training"]["device"])
-    out = model(x)
-    out = out.cpu().detach().numpy()
-    predicted_train = np.concatenate((predicted_train, out))
-
-# predict on the validation data, to see how the model does
-
-predicted_val = np.array([])
-
-for idx, (x, y) in enumerate(val_dataloader):
-    x = x.to(config["training"]["device"])
-    out = model(x)
-    out = out.cpu().detach().numpy()
-    predicted_val = np.concatenate((predicted_val, out))
-
-# prepare data for plotting
-
-to_plot_data_y_train_pred = np.zeros(num_data_points)
-to_plot_data_y_val_pred = np.zeros(num_data_points)
-
-to_plot_data_y_train_pred[config["data"]["window_size"]:split_index+config["data"]["window_size"]] = scaler.inverse_transform(predicted_train)
-to_plot_data_y_val_pred[split_index+config["data"]["window_size"]:] = scaler.inverse_transform(predicted_val)
-
-to_plot_data_y_train_pred = np.where(to_plot_data_y_train_pred == 0, None, to_plot_data_y_train_pred)
-to_plot_data_y_val_pred = np.where(to_plot_data_y_val_pred == 0, None, to_plot_data_y_val_pred)
-
-# plots
-
-fig = figure(figsize=(25, 5), dpi=80)
-fig.patch.set_facecolor((1.0, 1.0, 1.0))
-# plt.plot(data_date, data_close_price, label="Actual prices", color=config["plots"]["color_actual"])
-# plt.plot(data_date, to_plot_data_y_train_pred, label="Predicted prices (train)", color=config["plots"]["color_pred_train"])
-plt.plot(data_date, to_plot_data_y_val_pred, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
-plt.title("Compare predicted prices to actual prices")
-xticks = [data_date[i] if ((i%config["plots"]["xticks_interval"]==0 and (num_data_points-i) > config["plots"]["xticks_interval"]) or i==num_data_points-1) else None for i in range(num_data_points)] # make x ticks nice
-x = np.arange(0,len(xticks))
-plt.xticks(x, xticks, rotation='vertical')
-plt.grid(which='major', axis='y', linestyle='--')
-plt.legend()
-
-
-model.eval()
-
-x = torch.tensor(data_x_unseen).float().to(config["training"]["device"]).unsqueeze(0).unsqueeze(2) # this is the data type and shape required, [batch, sequence, feature]
-prediction = model(x)
-prediction = prediction.cpu().detach().numpy()
-
-# prepare plots
-
-plot_range = 10
-to_plot_data_y_val = np.zeros(plot_range)
-to_plot_data_y_val_pred = np.zeros(plot_range)
-to_plot_data_y_test_pred = np.zeros(plot_range)
-
-to_plot_data_y_val[:plot_range-1] = scaler.inverse_transform(data_y_val)[-plot_range+1:]
-to_plot_data_y_val_pred[:plot_range-1] = scaler.inverse_transform(predicted_val)[-plot_range+1:]
-
-to_plot_data_y_test_pred[plot_range-1] = scaler.inverse_transform(prediction)
-
-to_plot_data_y_val = np.where(to_plot_data_y_val == 0, None, to_plot_data_y_val)
-to_plot_data_y_val_pred = np.where(to_plot_data_y_val_pred == 0, None, to_plot_data_y_val_pred)
-to_plot_data_y_test_pred = np.where(to_plot_data_y_test_pred == 0, None, to_plot_data_y_test_pred)
-
-# plot
-
-plot_date_test = data_date[-plot_range+1:]
-plot_date_test.append("tomorrow")
-
-fig = figure(figsize=(25, 5), dpi=80)
-fig.patch.set_facecolor((1.0, 1.0, 1.0))
-plt.plot(plot_date_test, to_plot_data_y_val, label="Actual prices", marker=".", markersize=10, color=config["plots"]["color_actual"])
-plt.plot(plot_date_test, to_plot_data_y_val_pred, label="Past predicted prices", marker=".", markersize=10, color=config["plots"]["color_pred_val"])
-plt.plot(plot_date_test, to_plot_data_y_test_pred, label="Predicted price for next day", marker=".", markersize=20, color=config["plots"]["color_pred_test"])
-plt.title("Predicted close price of the next trading day")
-plt.grid(which='major', axis='y', linestyle='--')
-plt.legend()
-
-print(to_plot_data_y_val_pred)
-
-plt.show()
-
-print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
+    fig = figure(figsize=(25, 5), dpi=80)
+    fig.patch.set_facecolor((1.0, 1.0, 1.0))
+    # plt.plot(data_date, data_close_price, label="Actual prices", color=config["plots"]["color_actual"])
+    # plt.plot(data_date, to_plot_data_y_train_pred, label="Predicted prices (train)", color=config["plots"]["color_pred_train"])
+    plt.plot(AI.data_date, to_plot_data_y_val_pred, label="Predicted prices (validation)", color=config["plots"]["color_pred_val"])
+    plt.title("Compare predicted prices to actual prices")
+    xticks = [AI.data_date[i] if ((i%config["plots"]["xticks_interval"]==0 and (AI.num_data_points-i) > config["plots"]["xticks_interval"]) or i==AI.num_data_points-1) else None for i in range(AI.num_data_points)] # make x ticks nice
+    x = np.arange(0,len(xticks))
+    plt.xticks(x, xticks, rotation='vertical')
+    plt.grid(which='major', axis='y', linestyle='--')
+    plt.legend()
+    
+    
+    AI.model.eval()
+    
+    x = torch.tensor(AI.data_x_unseen).float().to(config["training"]["device"]).unsqueeze(0).unsqueeze(2) # this is the data type and shape required, [batch, sequence, feature]
+    prediction = AI.model(x)
+    prediction = prediction.cpu().detach().numpy()
+    
+    # prepare plots
+    
+    plot_range = 10
+    to_plot_data_y_val = np.zeros(plot_range)
+    to_plot_data_y_val_pred = np.zeros(plot_range)
+    to_plot_data_y_test_pred = np.zeros(plot_range)
+    
+    to_plot_data_y_val[:plot_range-1] = AI.scaler.inverse_transform(AI.data_y_val)[-plot_range+1:]
+    to_plot_data_y_val_pred[:plot_range-1] =  AI.scaler.inverse_transform(predicted_val)[-plot_range+1:]
+    
+    to_plot_data_y_test_pred[plot_range-1] = AI.scaler.inverse_transform(prediction)
+    
+    to_plot_data_y_val = np.where(to_plot_data_y_val == 0, None, to_plot_data_y_val)
+    to_plot_data_y_val_pred = np.where(to_plot_data_y_val_pred == 0, None, to_plot_data_y_val_pred)
+    to_plot_data_y_test_pred = np.where(to_plot_data_y_test_pred == 0, None, to_plot_data_y_test_pred)
+    
+    # plot
+    
+    plot_date_test = AI.data_date[-plot_range+1:]
+    plot_date_test.append("tomorrow")
+    
+    fig = figure(figsize=(25, 5), dpi=80)
+    fig.patch.set_facecolor((1.0, 1.0, 1.0))
+    plt.plot(plot_date_test, to_plot_data_y_val, label="Actual prices", marker=".", markersize=10, color=config["plots"]["color_actual"])
+    plt.plot(plot_date_test, to_plot_data_y_val_pred, label="Past predicted prices", marker=".", markersize=10, color=config["plots"]["color_pred_val"])
+    plt.plot(plot_date_test, to_plot_data_y_test_pred, label="Predicted price for next day", marker=".", markersize=20, color=config["plots"]["color_pred_test"])
+    plt.title("Predicted close price of the next trading day")
+    plt.grid(which='major', axis='y', linestyle='--')
+    plt.legend()
+    
+    print(to_plot_data_y_val_pred)
+    
+    # plt.show()
+    
+    print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
+    
+first_part()
+last_step()

@@ -15,10 +15,7 @@ from alpha_vantage.timeseries import TimeSeries
 print("All libraries loaded")
 
 final_data = {
-    "stock_data": {
-        "dates": [],
-        "data": [],
-    },
+    "stock_data": [],
     "prediction_data": {
         "dates": [],
         "data": [],
@@ -73,6 +70,30 @@ def download_data(config, symbol):
     data_close_price = [float(data[date][config["alpha_vantage"]["key_adjusted_close"]]) for date in data.keys()]
     data_close_price.reverse()
     data_close_price = np.array(data_close_price)
+
+
+    data_open_price = [float(data[date]["1. open"]) for date in data.keys()]
+    data_close_price = [float(data[date][config["alpha_vantage"]["key_adjusted_close"]]) for date in data.keys()]
+    data_low_price = [float(data[date]["3. low"]) for date in data.keys()]
+    data_high_price = [float(data[date]["2. high"]) for date in data.keys()]
+    data_date = [date for date in data.keys()]
+
+
+
+
+    for i in range(len(data_low_price)):
+        final_data["stock_data"].append(
+            {
+                "open": data_open_price[i],
+                "close": data_close_price[i],
+                "low": data_low_price[i],
+                "date": data_date[i],
+                "high": data_high_price[i]
+            }
+        )
+
+    print(final_data["stock_data"][3])
+    print(final_data["stock_data"][5700])
 
     num_data_points = len(data_date)
     display_date_range = "from " + data_date[0] + " to " + data_date[num_data_points-1]
@@ -330,10 +351,9 @@ def plot_stock(symbol="AAPL"):
     # plt.show()
 
 
-    print(to_plot_data_y_val_pred)
 
-    final_data["stock_data"]["data"] = to_plot_data_y_val_pred.tolist()
-    final_data["stock_data"]["dates"] = data_date
+
+
     # final_data.dates = data_date
     # prepare data for plotting the zoomed in view of the predicted prices (on validation set) vs. actual prices
 
@@ -398,7 +418,7 @@ def plot_stock(symbol="AAPL"):
     print("Hrere")
     print(plot_date_test)
 
-    return final_data
+    return final_data["stock_data"]
     
 
 if __name__ == "__main__": 

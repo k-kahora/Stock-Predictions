@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import stockpredict 
+form flask_cors import CORS
 
 app = Flask(__name__)
 
@@ -22,3 +23,4 @@ def get_incomes():
 def add_income():
     incomes.append(request.get_json())
     return '', 204
+CORS(app)

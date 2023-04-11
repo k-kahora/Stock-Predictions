@@ -8,8 +8,7 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-	d3.json("http://localhost:5000/predict/AAPL").then(data => {
-
+	d3.json("http://localhost:5000/predict/TSLA").then(data => {
 	    var svg = d3.select("body")
 		.append("svg")
 	        .attr("width", width + margin.left + margin.right)
@@ -52,10 +51,28 @@ function doThing() {
 		.append("g")
 		.attr("transform", "translate(0," + (height) + ")").call(xAxis)
 
+	    var box_plots = svg
+		.append("g")
+
+	    box_plots.selectAll("line")
+		.data(data)
+	        .enter().append("line")
+	        .classed("stem", true)
+		.attr("x1", function(d) { return x_scale(parseTime(d.date)); })
+		.attr("x2", function(d) { return x_scale(parseTime(d.date)); })
+		.attr("y1", function(d) { return y_scale(d.high); })
+		.attr("y2", function(d) { return y_scale(d.low); })
 	    // candle_wic
-	    // d3.selectAll("rect")
+	    // box_plots.selectAll("rect")
 	    // 	.data(data)
 	    //     .enter().append("rect")
+	    // 	.attr("x", function(d) { return x_scale(parseTime(d.date)); })
+	    // 	.attr("y", function(d) {return y_scale(d.low);})		  
+	    //     .attr("width", 3)
+	    //     .attr("height",3)
+		// .attr("height", function(d) { return y(min(d.Open, d.Close))-y(max(d.Open, d.Close));})
+		// .attr("width", function(d) { return 0.5 * (width - 2*margin)/data.length; })
+		// .attr("fill",function(d) { return d.Open > d.Close ? "red" : "green" ;});
 	    
 
 	    console.log(dates)
@@ -63,7 +80,7 @@ function doThing() {
 	    console.log(d3.max(data, d => d.high))
 	    
 svg.append("path")
-      .datum(data)
+		.datum(data.filter(d => parseTime(d.date) > new Date('11/14/2013 00:00')))
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)

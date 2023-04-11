@@ -101,7 +101,7 @@ def download_data(config, symbol):
 
     return data_date, data_close_price, num_data_points, display_date_range
 
-def plot_stock(symbol="AAPL"):
+def plot_stock(symbol):
 
     print(symbol)
     config["alpha_vantage"]["symbol"] = symbol

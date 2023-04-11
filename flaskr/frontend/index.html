@@ -1,16 +1,22 @@
 <html>
 <header>
     <title>Test page</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </header>
 
 <body>
     <div>This is simple test to get data from a backend</div>
     <div><span>Last update: </span><span id="time-container"></span></div>
     <button onclick="getUsers()">Get user data</button>
+    <button onclick="makeGraph()">Print Graph</button>
     <div id="result-container"></div>
+
 </body>
+
+
 <script>
     var xhr = null;
+  
 
     getXmlHttpRequestObject = function () {
         if (!xhr) {
@@ -37,6 +43,8 @@
         // asynchronous requests
         xhr.open("GET", "http://localhost:5000/predict/JNJ", true);
         // Send the request over the network
+
+
         xhr.send(null);
     }
     function getDate() {
@@ -45,9 +53,21 @@
         document.getElementById('time-container').textContent
             = date;
     }
+  
     (function () {
         getDate();
     })();
-</script>
 
+    function makeGraph() {
+	//     console.log("hres")   
+
+	// console.log(d3.max([4321,321,43214321]))
+
+	d3.json("http://localhost:5000/predict/JNJ").then(d => {
+	    console.log(d) 
+	})
+
+    }
+
+</script>
 </html>

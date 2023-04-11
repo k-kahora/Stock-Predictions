@@ -93,7 +93,6 @@ def download_data(config, symbol):
         )
 
     print(final_data["stock_data"][3])
-    print(final_data["stock_data"][5700])
 
     num_data_points = len(data_date)
     display_date_range = "from " + data_date[0] + " to " + data_date[num_data_points-1]
@@ -382,7 +381,6 @@ def plot_stock(symbol):
     x = torch.tensor(data_x_unseen).float().to(config["training"]["device"]).unsqueeze(0).unsqueeze(2) # this is the data type and shape required, [batch, sequence, feature]
     prediction = model(x)
     prediction = prediction.cpu().detach().numpy()
-    
     # prepare plots
     
     plot_range = 10
@@ -417,9 +415,16 @@ def plot_stock(symbol):
     print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
     print("Hrere")
     print(plot_date_test)
-
     return final_data["stock_data"]
     
+def reset_graph():
+    final_data = {
+        "stock_data": [],
+        "prediction_data": {
+            "dates": [],
+            "data": [],
+        }
+    }
 
 if __name__ == "__main__": 
     plot_stock()

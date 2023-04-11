@@ -8,7 +8,7 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-	d3.json("http://localhost:5000/predict/NVDA").then(data => {
+	d3.json("http://localhost:5000/predict/AAPL").then(data => {
 
 	    var svg = d3.select("body")
 		.append("svg")
@@ -16,15 +16,8 @@ function doThing() {
 	        .attr("height", height + margin.top + margin.bottom)
 	    .append("g")
     .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+          "translate(" + margin.left + "," + margin.top + ")").classed("chart", true)
 
-	    var y_axis = svg
-		.append("g")
-                .attr("id", "right")
-
-	    var x_axis = svg
-		.append("g")
-		.attr("transform", "translate(0," + (height) + ")")
 	    // var test_cirle = svg.append("circle")
 	    // 	.attr("cx", 20)
 	    // 	.attr("cy", 20)
@@ -46,10 +39,24 @@ function doThing() {
 
             var y_scale = d3.scaleLinear().domain([d3.min(data, d => d.close), d3.max(data, d => d.close)]).range([height, 0])
 
+	    console.log(d3.max(data, d => d.close))
+
 	    var xAxis = d3.axisBottom(x_scale)    
 	    var yAxis = d3.axisLeft(y_scale)    
-	    x_axis.call(xAxis)
-	    y_axis.call(yAxis)
+
+	    var y_axis = svg
+		.append("g")
+                .attr("id", "right").call(yAxis)
+
+	    var x_axis = svg
+		.append("g")
+		.attr("transform", "translate(0," + (height) + ")").call(xAxis)
+
+	    // candle_wic
+	    // d3.selectAll("rect")
+	    // 	.data(data)
+	    //     .enter().append("rect")
+	    
 
 	    console.log(dates)
 
@@ -62,7 +69,7 @@ svg.append("path")
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
             .x(function(d) { return x_scale(parseTime(d.date)) })
-            .y(function(d) {/* console.log(y_scale(d.high));*/return y_scale(d.high) })
+            .y(function(d) {/* console.log(y_scale(d.high));*/return y_scale(d.close) })
         )
 	})
 }

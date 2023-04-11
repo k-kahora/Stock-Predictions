@@ -25,7 +25,7 @@ final_data = {
 config = {
     "alpha_vantage": {
         "key": "1PE5QDO714ILKZ2Z", # Claim your free API key here: https://www.alphavantage.co/support/#api-key
-        "symbol": "JNJ",
+        "symbol": "TSLA",
         "outputsize": "full",
         "key_adjusted_close": "5. adjusted close",
     },

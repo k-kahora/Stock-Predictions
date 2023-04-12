@@ -361,6 +361,16 @@ def plot_stock(symbol):
     plt.xticks(xs, xticks, rotation='vertical')
     plt.grid(which='major', axis='y', linestyle='--')
     plt.legend()
+
+    for i in range(len(to_plot_predicted_val)):
+        final_data["prediction_data"].append(
+            {
+                "value": to_plot_predicted_val[i],
+                "date": to_plot_data_date[i],
+            }
+        )
+
+    print(final_data["prediction_data"])
     # plt.show()
 
     # predict the closing price of the next trading day
@@ -408,6 +418,7 @@ def plot_stock(symbol):
 
     final_data["closing_price"] = round(to_plot_data_y_test_pred[plot_range-1], 2)
 
+    print(len(to_plot_data_y_val_pred))
     return final_data
 
     

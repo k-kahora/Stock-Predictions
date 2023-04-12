@@ -11,6 +11,7 @@ function doThing() {
 	d3.json("http://localhost:5000/predict/TSLA").then(data_unformated => {
 	    data = data_unformated["stock_data"]
 	    console.log(data_unformated["closing_price"])
+	    console.log(data_unformated["prediction_data"])
 	    var svg = d3.select("body")
 		.append("svg")
 	        .attr("width", width + margin.left + margin.right)

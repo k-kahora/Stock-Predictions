@@ -8,7 +8,7 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-	d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
+      d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
 
 	    data = data_unformated["stock_data"].reverse()
 	    ai_data = data_unformated["prediction_data"]

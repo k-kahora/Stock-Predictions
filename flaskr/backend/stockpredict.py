@@ -56,8 +56,8 @@ config = {
 
 def download_data(config):
     ts = TimeSeries(key=config["alpha_vantage"]["key"])
+    print(config)
     data, meta_data = ts.get_daily_adjusted(config["alpha_vantage"]["symbol"], outputsize=config["alpha_vantage"]["outputsize"])
-
 
     data_date = [date for date in data.keys()]
     data_date.reverse()

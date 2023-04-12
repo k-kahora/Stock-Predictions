@@ -25,12 +25,20 @@ function doThing() {
 	    
 	    console.log(data) 
 
+	    var filterFunc = function(d) {
+		return parseTime(d) > new Date('11/14/2020 00:00')
+	    }
+	    var filterFuncN = function(d) {
+		return d > new Date('11/14/2020 00:00')
+	    }
+
 	    var parseTime = d3.timeParse("%Y-%m-%d")
 	    var dates = [];
 	    for (let obj of data) {
 		dates.push(parseTime(obj.date));
 	    }
 	    var x_domain = d3.extent(dates)
+	    console.log(x_domain)
 
 	    var x_scale = d3.scaleTime()
 		.domain(x_domain)
@@ -54,14 +62,14 @@ function doThing() {
 	    var box_plots = svg
 		.append("g")
 
-	    box_plots.selectAll("line")
-		.data(data)
-	        .enter().append("line")
-	        .classed("stem", true)
-		.attr("x1", function(d) { return x_scale(parseTime(d.date)); })
-		.attr("x2", function(d) { return x_scale(parseTime(d.date)); })
-		.attr("y1", function(d) { return y_scale(d.high); })
-		.attr("y2", function(d) { return y_scale(d.low); })
+	    // box_plots.selectAll("line")
+	    // 	.data(data)
+	    //     .enter().append("line")
+	    //     .classed("stem", true)
+	    // 	.attr("x1", function(d) { return x_scale(parseTime(d.date)); })
+	    // 	.attr("x2", function(d) { return x_scale(parseTime(d.date)); })
+	    // 	.attr("y1", function(d) { return y_scale(d.high); })
+	    // 	.attr("y2", function(d) { return y_scale(d.low); })
 	    // candle_wic
 	    // box_plots.selectAll("rect")
 	    // 	.data(data)
@@ -80,7 +88,7 @@ function doThing() {
 	    console.log(d3.max(data, d => d.high))
 	    
 svg.append("path")
-		.datum(data.filter(d => parseTime(d.date) > new Date('11/14/2013 00:00')))
+		.datum(data)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)

@@ -10,7 +10,13 @@ function doThing() {
 
       d3.json("http://localhost:5000/predict/MSFT").then(data_unformated => {
 
-	    data = data_unformated["stock_data"].reverse()
+	    var filterFunc = function(d) {
+		return parseTime(d) > new Date('11/14/2020 00:00')
+	    }
+	    var filterFuncN = function(d) {
+		return d > new Date('11/14/2020 00:00')
+	    }
+
 	    ai_data = data_unformated["prediction_data"]
 	    final_price = data_unformated["closing_price"]
 
@@ -22,36 +28,32 @@ function doThing() {
 	    .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")").classed("chart", true)
-	    console.log(data) 
 
-	    var filterFunc = function(d) {
-		return parseTime(d) > new Date('11/14/2020 00:00')
-	    }
-	    var filterFuncN = function(d) {
-		return d > new Date('11/14/2020 00:00')
-	    }
-
-	    // Each time needs to be converted to a javascript
 	    var parseTime = d3.timeParse("%Y-%m-%d")
+	    minimum_date_perdicted = d3.min(ai_data, d => parseTime(d.date))
+	  data = data_unformated["stock_data"].reverse();
+	    // Each time needs to be converted to a javascript
 	    var dates = [];
 	    for (let obj of data) {
-		dates.push(parseTime(obj.date));
+		if (parseTime(obj.date) > minimum_date_perdicted) {
+		     dates.push(parseTime(obj.date));
+		}
 	    }
 	    var x_domain = d3.extent(dates)
 	    console.log(x_domain)
 	  
-	    minimum_date_perdicted = d3.min(ai_data, d => parseTime(d.date))
 	    console.log("Minimum Here")
 	    console.log(minimum_date_perdicted)
 	    console.log(x_domain[1])
 
 	    var x_scale = d3.scaleTime()
-		.domain([minimum_date_perdicted, x_domain[1]])
+		.domain(x_domain)
 		.range([ 0, width ]);
 
 	  console.log()
 
-            var y_scale = d3.scaleLinear().domain([d3.min(data, d => d.close), d3.max(data, d => d.close)]).range([height, 0])
+	  data = data.filter(d => parseTime(d.date) > minimum_date_perdicted)
+          var y_scale = d3.scaleLinear().domain([d3.min(data, d => d.close), d3.max(data, d => d.close)]).range([height, 0])
 
 	    console.log("max")
 	    console.log(d3.max(data, d => d.close))
@@ -81,7 +83,7 @@ svg.append("path")
         )
 
 svg.append("path")
-	      .datum(data.filter(filterFunc))
+	      .datum(data)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)

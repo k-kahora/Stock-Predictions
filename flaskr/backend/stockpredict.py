@@ -66,6 +66,7 @@ def download_data(config):
     data_close_price = [float(data[date][config["alpha_vantage"]["key_adjusted_close"]]) for date in data.keys()]
     data_low_price = [float(data[date]["3. low"]) for date in data.keys()]
     data_high_price = [float(data[date]["2. high"]) for date in data.keys()]
+    data_close_price.reverse()
 
     for i in range(len(data_low_price)):
         final_data["stock_data"].append(
@@ -85,7 +86,6 @@ def download_data(config):
     print("low length" + str(len(data_low_price)))
     print("high length" + str(len(data_high_price)))
 
-    data_close_price.reverse()
     data_close_price = np.array(data_close_price)
 
     num_data_points = len(data_date)
@@ -341,7 +341,6 @@ def plot_stock(symbol):
     plt.legend()
     # plt.show()
 
-    print(to_plot_data_y_val_pred)
 
     # prepare data for plotting the zoomed in view of the predicted prices (on validation set) vs. actual prices
 
@@ -366,11 +365,11 @@ def plot_stock(symbol):
         final_data["prediction_data"].append(
             {
                 "value": to_plot_predicted_val[i],
-                "date": to_plot_data_date[i],
+                "date": to_plot_data_date[i]
             }
         )
 
-    print(final_data["prediction_data"])
+
     # plt.show()
 
     # predict the closing price of the next trading day
@@ -414,7 +413,6 @@ def plot_stock(symbol):
 
     print("Predicted close price of the next trading day:", round(to_plot_data_y_test_pred[plot_range-1], 2))
     print("Hrere")
-    print(plot_date_test)
 
     final_data["closing_price"] = round(to_plot_data_y_test_pred[plot_range-1], 2)
 

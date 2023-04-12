@@ -8,9 +8,12 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-	d3.json("http://localhost:5000/predict/TSLA").then(data_unformated => {
-	    data = data_unformated["stock_data"]
-	    console.log(data_unformated["closing_price"])
+	d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
+
+	    data = data_unformated["stock_data"].reverse()
+	    ai_data = data_unformated["prediction_data"]
+	    final_price = data_unformated["closing_price"]
+
 	    console.log(data_unformated["prediction_data"])
 	    var svg = d3.select("body")
 		.append("svg")
@@ -49,6 +52,7 @@ function doThing() {
 
             var y_scale = d3.scaleLinear().domain([d3.min(data, d => d.close), d3.max(data, d => d.close)]).range([height, 0])
 
+	    console.log("max")
 	    console.log(d3.max(data, d => d.close))
 
 	    var xAxis = d3.axisBottom(x_scale)    
@@ -65,31 +69,16 @@ function doThing() {
 	    var box_plots = svg
 		.append("g")
 
-	    // box_plots.selectAll("line")
-	    // 	.data(data)
-	    //     .enter().append("line")
-	    //     .classed("stem", true)
-	    // 	.attr("x1", function(d) { return x_scale(parseTime(d.date)); })
-	    // 	.attr("x2", function(d) { return x_scale(parseTime(d.date)); })
-	    // 	.attr("y1", function(d) { return y_scale(d.high); })
-	    // 	.attr("y2", function(d) { return y_scale(d.low); })
-	    // candle_wic
-	    // box_plots.selectAll("rect")
-	    // 	.data(data)
-	    //     .enter().append("rect")
-	    // 	.attr("x", function(d) { return x_scale(parseTime(d.date)); })
-	    // 	.attr("y", function(d) {return y_scale(d.low);})		  
-	    //     .attr("width", 3)
-	    //     .attr("height",3)
-		// .attr("height", function(d) { return y(min(d.Open, d.Close))-y(max(d.Open, d.Close));})
-		// .attr("width", function(d) { return 0.5 * (width - 2*margin)/data.length; })
-		// .attr("fill",function(d) { return d.Open > d.Close ? "red" : "green" ;});
-	    
+svg.append("path")
+		.datum(ai_data)
+      .attr("fill", "none")
+      .attr("stroke", "black")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+            .x(function(d) { return x_scale(parseTime(d.date)) })
+            .y(function(d) {/* console.log(y_scale(d.high));*/return y_scale(d.value) })
+        )
 
-	    console.log(dates)
-
-	    console.log(d3.max(data, d => d.high))
-	    
 svg.append("path")
 		.datum(data)
       .attr("fill", "none")

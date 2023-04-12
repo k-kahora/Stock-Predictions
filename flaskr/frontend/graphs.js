@@ -8,7 +8,7 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-      d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
+      d3.json("http://localhost:5000/predict/MSFT").then(data_unformated => {
 
 	    data = data_unformated["stock_data"].reverse()
 	    ai_data = data_unformated["prediction_data"]
@@ -22,13 +22,6 @@ function doThing() {
 	    .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")").classed("chart", true)
-
-	    // var test_cirle = svg.append("circle")
-	    // 	.attr("cx", 20)
-	    // 	.attr("cy", 20)
-	    // 	.attr("r", 20)
-	    // 	.attr("fill", "red")
-	    
 	    console.log(data) 
 
 	    var filterFunc = function(d) {
@@ -38,6 +31,7 @@ function doThing() {
 		return d > new Date('11/14/2020 00:00')
 	    }
 
+	    // Each time needs to be converted to a javascript
 	    var parseTime = d3.timeParse("%Y-%m-%d")
 	    var dates = [];
 	    for (let obj of data) {
@@ -45,10 +39,17 @@ function doThing() {
 	    }
 	    var x_domain = d3.extent(dates)
 	    console.log(x_domain)
+	  
+	    minimum_date_perdicted = d3.min(ai_data, d => parseTime(d.date))
+	    console.log("Minimum Here")
+	    console.log(minimum_date_perdicted)
+	    console.log(x_domain[1])
 
 	    var x_scale = d3.scaleTime()
-		.domain(x_domain)
+		.domain([minimum_date_perdicted, x_domain[1]])
 		.range([ 0, width ]);
+
+	  console.log()
 
             var y_scale = d3.scaleLinear().domain([d3.min(data, d => d.close), d3.max(data, d => d.close)]).range([height, 0])
 
@@ -80,7 +81,7 @@ svg.append("path")
         )
 
 svg.append("path")
-		.datum(data)
+	      .datum(data.filter(filterFunc))
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)

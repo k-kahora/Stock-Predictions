@@ -15,10 +15,8 @@ from alpha_vantage.timeseries import TimeSeries
 print("All libraries loaded")
 final_data = {
     "stock_data": [],
-    "prediction_data": {
-        "dates": [],
-        "data": [],
-    }
+    "prediction_data": [],
+    "closing_price": 0,
 }
 
 config = {
@@ -408,7 +406,9 @@ def plot_stock(symbol):
     print("Hrere")
     print(plot_date_test)
 
-    return final_data["stock_data"]
+    final_data["closing_price"] = round(to_plot_data_y_test_pred[plot_range-1], 2)
+
+    return final_data
 
     
 

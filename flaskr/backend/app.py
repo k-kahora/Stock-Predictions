@@ -11,7 +11,6 @@ incomes = [
 @app.route('/predict/<symbol>')
 def get_stock(symbol):
     return_obj = stockpredict.plot_stock(symbol)
-    stockpredict.reset_graph()
     return jsonify(return_obj)
 
 @app.route('/test')

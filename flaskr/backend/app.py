@@ -21,7 +21,6 @@ def get_test():
 def get_incomes():
     return jsonify(incomes)
 
-
 @app.route('/incomes', methods=['POST'])
 def add_income():
     incomes.append(request.get_json())

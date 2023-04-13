@@ -13,11 +13,6 @@ from matplotlib.pyplot import figure
 from alpha_vantage.timeseries import TimeSeries 
 
 print("All libraries loaded")
-final_data = {
-    "stock_data": [],
-    "prediction_data": [],
-    "closing_price": 0,
-}
 
 config = {
     "alpha_vantage": {
@@ -48,13 +43,14 @@ config = {
     "training": {
         "device": "cpu", # "cuda" or "cpu"
         "batch_size": 64,
-        "num_epoch": 3,
+        "num_epoch": 100,
         "learning_rate": 0.01,
         "scheduler_step_size": 40,
     }
 }
 
 def download_data(config):
+    
     ts = TimeSeries(key=config["alpha_vantage"]["key"])
     print(config)
     data, meta_data = ts.get_daily_adjusted(config["alpha_vantage"]["symbol"], outputsize=config["alpha_vantage"]["outputsize"])
@@ -71,6 +67,12 @@ def download_data(config):
     data_low_price.reverse()
     data_high_price.reverse()
 
+    final_data = {
+        "stock_data": [],
+        "prediction_data": [],
+        "closing_price": 0,
+    }
+    
     for i in range(len(data_low_price)):
         final_data["stock_data"].append(
             {
@@ -95,12 +97,14 @@ def download_data(config):
     display_date_range = "from " + data_date[0] + " to " + data_date[num_data_points-1]
     # print("Number data points", num_data_points, display_date_range)
 
-    return data_date, data_close_price, num_data_points, display_date_range
+    return data_date, data_close_price, num_data_points, display_date_range, final_data
 
 def plot_stock(symbol):
+    
+
     config["alpha_vantage"]["symbol"] = symbol
 
-    data_date, data_close_price, num_data_points, display_date_range = download_data(config)
+    data_date, data_close_price, num_data_points, display_date_range, final_data = download_data(config)
 
 # plot
 

@@ -67,6 +67,9 @@ def download_data(config):
     data_low_price = [float(data[date]["3. low"]) for date in data.keys()]
     data_high_price = [float(data[date]["2. high"]) for date in data.keys()]
     data_close_price.reverse()
+    data_open_price.reverse()
+    data_low_price.reverse()
+    data_high_price.reverse()
 
     for i in range(len(data_low_price)):
         final_data["stock_data"].append(
@@ -422,4 +425,5 @@ def plot_stock(symbol):
     
 
 if __name__ == "__main__": 
-    plot_stock()
+    plotstock()
+

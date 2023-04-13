@@ -11,16 +11,22 @@ incomes = [
 @app.route('/predict/<symbol>')
 def get_stock(symbol):
     num_epoch = request.args.get("num_epoch", type=int, default=100)
+    learning_rate = request.args.get("learning_rate", type=float, default=0.01)
+    ltsm_size = request.args.get("ltsm_size", type=int, default=32)
+    batch_size = request.args.get("batch_size", type=int, default=64)
+    dropout = request.args.get("dropout", type=int, default=0.02)
+    num_lstm_layers = request.args.get("num_lstm_layers", type=int, default=2)
+    scheduler_step_size = request.args.get("scheduler_step_size", type=int, default=40)
 
     new_vars = {
         "stock": symbol,
         "num_epoch": num_epoch,
-        "learning_rate": 0.01,
-        "ltsm_size": 32,
-        "batch_size": 64,
-        "dropout": 32,
-        "num_lstm_layers": 2,
-        "scheduler_step_size": 0,
+        "learning_rate": learning_rate,
+        "ltsm_size": ltsm_size,
+        "batch_size": batch_size,
+        "dropout": dropout,
+        "num_lstm_layers": num_lstm_layers,
+        "scheduler_step_size": scheduler_step_size,
     }
 
     return_obj = stockpredict.plot_stock(new_vars)

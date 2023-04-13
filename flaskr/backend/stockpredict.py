@@ -104,6 +104,12 @@ def plot_stock(request):
 
     config["alpha_vantage"]["symbol"] = request["stock"] 
     config["training"]["num_epoch"] = request["num_epoch"] 
+    config["training"]["learning_rate"] = request["learning_rate"] 
+    config["model"]["ltsm_size"] = request["ltsm_size"] 
+    config["training"]["batch_size"] = request["batch_size"] 
+    config["model"]["dropout"] = request["dropout"] 
+    config["model"]["num_lstm_layers"] = request["num_lstm_layers"] 
+    config["training"]["scheduler_step_size"] = request["scheduler_step_size"] 
 
 
     data_date, data_close_price, num_data_points, display_date_range, final_data = download_data(config)

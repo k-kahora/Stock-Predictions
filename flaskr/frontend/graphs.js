@@ -22,9 +22,9 @@ values = {
     "learning_rate": 0.01,
     "ltsm_size": 32,
     "batch_size": 64,
-    "dropout": 32,
+    "dropout": 0.2,
     "num_lstm_layers": 2,
-    "scheduler_step_size": 0,
+    "scheduler_step_size": 40,
 }
 
 function getUserInput() {
@@ -36,11 +36,11 @@ function getUserInput() {
 	"ltsm_size": d3.select("#ltsm_size").property("value"),
 	"batch_size": d3.select("#batch_size").property("value"),
 	"dropout": d3.select("#dropout").property("value"),
-	"num_lstm_layers": d3.select("#num_lstm_layers").property("value"),
+	"num_ltsm_layers": d3.select("#dropout").property("value"),
 	"scheduler_step_size": d3.select("#scheduler_step_size").property("value"),
     }
 
-    addr = "http://localhost:5000/predict/" + values.stock + "?num_epoch=" + values["num_epoch"]
+    addr = "http://localhost:5000/predict/" + values.stock + "?num_epoch=" + values["num_epoch"] + "&learning_rate=" + values["learning_rate"] + "&ltsm_size=" + values["ltsm_size"] + "&batch_size=" + values["batch_size"] + "&dropout=" + values["dropout"] + "&num_ltsm_layers="   + values["num_ltsm_layers"] + "&scheduler_step_size=" + values["scheduler_step_size"] 
     console.log(addr)
     return addr
     

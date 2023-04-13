@@ -99,10 +99,12 @@ def download_data(config):
 
     return data_date, data_close_price, num_data_points, display_date_range, final_data
 
-def plot_stock(symbol):
+def plot_stock(request):
     
 
-    config["alpha_vantage"]["symbol"] = symbol
+    config["alpha_vantage"]["symbol"] = request["stock"] 
+    config["training"]["num_epoch"] = request["num_epoch"] 
+
 
     data_date, data_close_price, num_data_points, display_date_range, final_data = download_data(config)
 

@@ -29,7 +29,7 @@ values = {
 
 function getUserInput() {
 
-   return values = {
+   values = {
 	"stock": d3.select("#stock").property("value"),
 	"num_epoch": d3.select("#num_epoch").property("value"),
 	"learning_rate": d3.select("#learning_rate").property("value"),
@@ -39,12 +39,15 @@ function getUserInput() {
 	"num_lstm_layers": d3.select("#num_lstm_layers").property("value"),
 	"scheduler_step_size": d3.select("#scheduler_step_size").property("value"),
     }
+
+    addr = "http://localhost:5000/predict/" + values.stock + "?num_epoch=" + values["num_epoch"]
+    console.log(addr)
+    return addr
     
 }
 
 function doThing() {
 
-    values = getUserInput()
 	//     console.log("hres")   
 	// console.log(d3.max([4321,321,43214321]))
     var width = 1000
@@ -55,7 +58,7 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
-    d3.json("http://localhost:5000/predict/" + values["stock"]).then(data_unformated => {
+    d3.json(getUserInput()).then(data_unformated => {
 
 
 	    // potential filter functions

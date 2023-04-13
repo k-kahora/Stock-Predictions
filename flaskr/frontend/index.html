@@ -16,8 +16,7 @@
   </head>
 
   <body>
-    <script type="text/javascript" src="graphs.js"></script>
-                     <button onclick="doThing()" class="btn btn-primary" type="submit">Search </button> 
+                     <button onclick="test()" class="btn btn-primary" type="submit">Search </button> 
     <header>
         <h1>
             
@@ -51,60 +50,57 @@
                         
                         <div class="col-md-4 mb-3">
                           <label for="validationTooltip01">Stock</label>
-                          <input type="text" class="form-control" id="validationTooltip01" placeholder="enter stock"  required>
+                          <input type="text" class="form-control" id="stock" placeholder="enter stock" value="TSLA"  required>
                           <div class="valid-tooltip">
                           
                           </div>
                         </div>
                     <div class="form-row">
-
-                        
                       <div class="col-md-4 mb-3">
                         <label for="validationTooltip01">epochs</label>
-                        <input type="text" class="form-control" id="validationTooltip01" placeholder="enter value"  required>
+                        <input  type="number" class="form-control" id="num_epoch" placeholder="enter value" value=100  required>
                         <div class="valid-tooltip">
                         
                         </div>
                       </div>
                       <div class="col-md-4 mb-3">
                         <label for="validationTooltip02">learning rate</label>
-                        <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                        <input type="number" class="form-control" id="learning_rate" placeholder="enter value" value=0.01 required>
                         <div class="valid-tooltip">
                         
                         </div>
                       </div>
                       <div class="col-md-4 mb-3">
-                        <label for="validationTooltip02">lstm-size</label>
-                        <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                        <label for="validationTooltip02"> ltsm size </label>
+                        <input type="number" class="form-control" id="ltsm_size" placeholder="enter value" value=32 required>
                         <div class="valid-tooltip">
-                        
                         </div>
                       </div>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label for="validationTooltip02">learning rate</label>
-                        <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                        <label for="validationTooltip02">batch size</label>
+                        <input type="number" class="form-control" id="batch_size" placeholder="enter value" value="64" required>
                         <div class="valid-tooltip">
                         
                         </div>
                       </div>
                       <div class="col-md-4 mb-3">
                         <label for="validationTooltip02"> dropout </label>
-                        <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                        <input type="number" class="form-control" id="dropout" placeholder="enter value" value=0.2 required>
                         <div class="valid-tooltip">
                         
                         </div>
                       </div>
                       <div class="col-md-4 mb-3">
                         <label for="validationTooltip02">layers</label>
-                        <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                        <input type="number" class="form-control" id="num_lstm_layers" placeholder="enter value" value=2 required>
                         <div class="valid-tooltip">
                         
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
                       <label for="validationTooltip02">step size</label>
-                      <input type="text" class="form-control" id="validationTooltip02" placeholder="enter value" value="" required>
+                      <input type="number" class="form-control" id="scheduler_step_size" placeholder="enter value" value=40 required>
                       <div class="valid-tooltip">
                         
                       </div> 
@@ -134,5 +130,6 @@
     </main>
     <hr />
 
+    <script type="text/javascript" src="graphs.js"></script>
   </body>
 </html>

@@ -1,8 +1,40 @@
 function test() {
-    d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
-	console.log(data_unformated)
-    })}
+values = {
+    "stock": d3.select("#stock").property("value"),
+    "num_epoch": d3.select("#num_epoch").property("value"),
+    "learning_rate": d3.select("#learning_rate").property("value"),
+    "ltsm_size": d3.select("#ltsm_size").property("value"),
+    "batch_size": d3.select("#batch_size").property("value"),
+    "dropout": d3.select("#dropout").property("value"),
+    "num_lstm_layers": d3.select("#num_lstm_layers").property("value"),
+    "scheduler_step_size": d3.select("#scheduler_step_size").property("value"),
+}
+    console.log(values)
+}
+
+d3.select("#epochs").on("input", function() {
+	console.log("val")
+})
+
+values = {
+    "stock": "TSLA",
+    "num_epoch": 3,
+    "learning_rate": 0.01,
+    "ltsm_size": 32,
+    "batch_size": 64,
+    "dropout": 32,
+    "num_lstm_layers": 2,
+    "scheduler_step_size": 0,
+}
+
+function getUserInput() {
+
+    
+}
+
 function doThing() {
+
+    values = getUserInput()
 	//     console.log("hres")   
 	// console.log(d3.max([4321,321,43214321]))
     var width = 1000
@@ -14,6 +46,7 @@ function doThing() {
       height = height - margin.top - margin.bottom;
 
       d3.json("http://localhost:5000/predict/XOM").then(data_unformated => {
+
 
 	    // potential filter functions
 	    var filterFunc = function(d) {

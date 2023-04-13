@@ -58,9 +58,11 @@ function doThing() {
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
+    
     d3.json(getUserInput()).then(data_unformated => {
 
-
+	    var stock = d3.select("#stock").property("value")
+	console.log(stock)
 	    // potential filter functions
 	    var filterFunc = function(d) {
 		return parseTime(d) > new Date('11/14/2020 00:00')
@@ -105,7 +107,8 @@ function doThing() {
 	    // filter the data down to the same as the predicted to get reasomalbl scales
 		data = data.filter(d => parseTime(d.date) > minimum_date_perdicted)
 	    ai_data = ai_data.filter(d => parseTime(d.date) > minimum_date_perdicted)
-            var y_scale = d3.scaleLinear().domain([d3.min(ai_data, d => d.value), d3.max(data, d => d.close)]).range([height, 0])
+	var minimum = d3.min(ai_data, d => d.value) > d3.min(data, d => d.close) ? d3.min(ai_data, d => d.value) : d3.min(data, d => d.close) 
+            var y_scale = d3.scaleLinear().domain([minimum, d3.max(data, d => d.close)]).range([height, 0])
 
 	    var xAxis = d3.axisBottom(x_scale)    
 	    var yAxis = d3.axisLeft(y_scale)    
@@ -130,6 +133,24 @@ function doThing() {
 		.append("g")
 
 	    // This is the predicted data after machine learning
+const markerLine = svg
+	.append('line')
+	.attr('x1', 0)
+	.attr('x2', 0)
+	.attr('y1', 0)
+	.attr('y2', height)
+	.attr('stroke-width', 3)
+	.attr('stroke', 'darkviolet')
+	.attr('opacity', 0)
+	
+const markerDot = svg
+	.append('circle')
+	.attr('cx', 0)
+	.attr('cy', 0)
+	.attr('r', 5)
+	.attr('fill', 'darkviolet')
+	.attr('opacity', 0)
+
 	    ai_plots.append("path")
 	      .datum(ai_data)
 	      .attr("fill", "none")
@@ -147,7 +168,39 @@ function doThing() {
 	      .attr("stroke-width", 1.5)
 	      .attr("d", d3.line()
 		    .x(function(d) { return x_scale(parseTime(d.date)) })
-		    .y(function(d) {/* console.log(y_scale(d.high));*/return y_scale(d.close) })
-	      )
+		    .y(function(d) {/* console.log(y_scale(d.high));*/return y_scale(d.close) }))
+              stock_plots.append("text")
+		    .attr("x", width/2)
+		    .attr("y", margin.top)
+		    .attr("text-anchor","middle") 
+		    .attr("font-size","16px") 
+		    .text(stock + " Stock") 
+
+              stock_plots.append("text")
+		    .attr("x", width/2)
+		    .attr("y", margin.top + 20)
+		    .attr("text-anchor","middle") 
+		    .attr("font-size","16px") 
+	    .text("Predicted Price for next trading day: " + final_price) 
+const bisect = d3.bisector(d => d.date)
+// svg.on('mousemove', (e) => {
+// 	const pointerCoords = d3.pointer(e)
+// 	const [posX, posY] = pointerCoords
+//         const date = x_scale.invert(posX)
+//         const index = bisect.center(data, date)
+// 	const d = data[index]
+//         const x = x_scale(d)
+//         const y = y_scale(d)	
+    
+// 	markerLine
+// 		.attr('x1', x)
+// 		.attr('x2', x)
+// 		.attr('opacity', 1)
+	
+// 	markerDot
+// 		.attr('cx', x)
+// 		.attr('cy', y)
+// 		.attr('opacity', 1)
+// })
 	})
 }
